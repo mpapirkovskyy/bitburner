@@ -1,3 +1,4 @@
+/** @param {import(".").NS } ns */
 export async function main(ns) {
   const target = ns.args[0]
   const threads = ns.args[1]
@@ -7,7 +8,5 @@ export async function main(ns) {
     await ns.sleep(delay)
   }
 
-  ns.print(`Starting operation: hack on ${target} in ${threads} threads`)
-  await ns.hack(target, { threads, stock: true })
-  ns.exit()
+  await ns.grow(target, { threads, stock: true })
 }

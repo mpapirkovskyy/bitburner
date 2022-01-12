@@ -22,6 +22,22 @@ export function setItem(key, value) {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
+/** @param {import(".").NS } ns */
+export function getPlayerDetails(ns) {
+  let portHacks = 0
+
+  hackPrograms.forEach((hackProgram) => {
+    if (ns.fileExists(hackProgram, 'home')) {
+      portHacks += 1
+    }
+  })
+
+  return {
+    hackingLevel: ns.getHackingLevel(),
+    portHacks,
+  }
+}
+
 export async function main(ns) {
   return {
     settings,

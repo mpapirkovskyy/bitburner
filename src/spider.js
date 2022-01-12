@@ -1,6 +1,7 @@
-import { settings, setItem } from 'common.ns'
+import { settings, setItem } from './common.js'
 
 const hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe']
+const mainHackScript = 'mainHack.js'
 
 function getPlayerDetails(ns) {
   let portHacks = 0
@@ -25,16 +26,8 @@ function allHacks(host) {
   ns.sqlinject(host)
 }
 
-function localeHHMMSS(ms = 0) {
-  if (!ms) {
-    ms = new Date().getTime()
-  }
-
-  return new Date(ms).toLocaleTimeString()
-}
-
 export async function main(ns) {
-  ns.tprint(`[${localeHHMMSS()}] Starting spider.ns`)
+  ns.tprint(`Starting spider.ns`)
 
   const scriptToRunAfter = ns.args[0]
 
@@ -142,10 +135,10 @@ export async function main(ns) {
   setItem(settings().keys.serverMap, serverMap)
 
   if (!scriptToRunAfter) {
-    ns.tprint(`[${localeHHMMSS()}] Spawning mainHack.ns`)
-    ns.spawn('mainHack.ns', 1)
+    ns.tprint(`Spawning ${mainHackScript}`)
+    ns.spawn(mainHackScript, 1)
   } else {
-    ns.tprint(`[${localeHHMMSS()}] Spawning ${scriptToRunAfter}`)
+    ns.tprint(`Spawning ${scriptToRunAfter}`)
     ns.spawn(scriptToRunAfter, 1)
   }
 }
