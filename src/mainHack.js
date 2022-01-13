@@ -6,7 +6,7 @@ const settings = {
   minSecurityLevelOffset: 1,
   maxMoneyMultiplayer: 0.9,
   minSecurityWeight: 100,
-  mapRefreshInterval: 24 * 60 * 60 * 1000,
+  mapRefreshInterval: 2 * 60 * 60 * 1000,
   maxWeakenTime: 30 * 60 * 1000,
   keys: {
     serverMap: 'BB_SERVER_MAP',
@@ -22,6 +22,13 @@ const mainHackScript = 'mainHack.js'
 const playerServersScript = 'playerServers.js'
 const spiderScript = 'spider.js'
 
+const hackScript = 'hack.js'
+const growScript = 'grow.js'
+const weakenScript = 'weaken.js'
+
+const hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe']
+const hackScripts = [hackScript, growScript, weakenScript]
+
 function getItem(key) {
   let item = localStorage.getItem(key)
 
@@ -31,13 +38,6 @@ function getItem(key) {
 function setItem(key, value) {
   localStorage.setItem(key, JSON.stringify(value))
 }
-
-const hackScript = 'hack.js'
-const growScript = 'grow.js'
-const weakenScript = 'weaken.js'
-
-const hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe']
-const hackScripts = [hackScript, growScript, weakenScript]
 
 function getPlayerDetails(ns) {
   let portHacks = 0
@@ -135,15 +135,19 @@ function findTargetServer(ns, serversList, servers, serverExtraData) {
 
   let weightedServers = serversList.map((hostname) => {
     const fullHackCycles = Math.ceil(0.8 / Math.max(0.00000001, ns.hackAnalyze(hostname)) / ns.hackAnalyzeChance(hostname))
+    const halfHackThreads = Math.floor(0.5 / Math.max(0.00000001, ns.hackAnalyze(hostname)))
+    const growThreads =  Math.ceil(ns.growthAnalyze(hostname, 2.5))
 
     serverExtraData[hostname] = {
       fullHackCycles,
+      halfHackThreads,
+      growThreads
     }
 
     const weakenTime = ns.getWeakenTime(hostname) 
     // TODO serverValue is not ideal, need adjustment, needs to account minSecurity instead of current
     // const serverValue = servers[hostname].maxMoney * (settings.minSecurityWeight / (servers[hostname].minSecurityLevel + ns.getServerSecurityLevel(hostname)))
-    const serverValue = servers[hostname].maxMoney * ns.hackAnalyze(hostname) * ns.hackAnalyzeChance(hostname) * Math.min(fullHackCycles, serverExtraData['hackCycles'])  / weakenTime
+    const serverValue = servers[hostname].maxMoney / (halfHackThreads + growThreads) / servers[hostname].minSecurityLevel
 
     return {
       hostname,
@@ -211,6 +215,7 @@ export async function main(ns) {
 
     const targetServers = findTargetServer(ns, allServers, serverMap.servers, serverExtraData)
     const bestTarget = targetServers.shift()
+
     const hackTime = ns.getHackTime(bestTarget)
     const growTime = ns.getGrowTime(bestTarget)
     const weakenTime = ns.getWeakenTime(bestTarget)
@@ -303,6 +308,9 @@ export async function main(ns) {
         }
       }
     } else {
+
+
+
       if (hackCycles > serverExtraData[bestTarget].fullHackCycles) {
         hackCycles = serverExtraData[bestTarget].fullHackCycles
 
